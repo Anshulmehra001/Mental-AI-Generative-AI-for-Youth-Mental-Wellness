@@ -3,15 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Send, Bot, User, Heart, AlertCircle } from 'lucide-react';
+import { Send, Bot, User, Heart, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { aiService, ChatMessage } from '@/services/aiService';
+import { storageService } from '@/services/storageService';
+import CrisisIntervention from './CrisisIntervention';
 
-interface Message {
+interface Message extends ChatMessage {
   id: string;
-  content: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-  sentiment?: 'positive' | 'neutral' | 'negative' | 'crisis';
 }
 
 interface ChatInterfaceProps {
@@ -23,14 +22,15 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm your Plant Companion! 🌱 I'm here to listen, support, and grow with you. How are you feeling today?",
-      sender: 'bot',
+      content: "Hello! I'm PlantPal, your AI companion! 🌱 I'm here to listen, support, and grow with you. How are you feeling today?",
+      role: 'assistant',
       timestamp: new Date(),
       sentiment: 'positive'
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [showCrisisIntervention, setShowCrisisIntervention] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -40,7 +40,7 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
       const newMessage: Message = {
         id: Date.now().toString(),
         content: plantInteraction,
-        sender: 'bot',
+        role: 'assistant',
         timestamp: new Date(),
         sentiment: 'positive'
       };
@@ -118,42 +118,70 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: inputValue,
-      sender: 'user',
+      content: inputValue.trim(),
+      role: 'user',
       timestamp: new Date()
     };
+
+    // Analyze sentiment using AI service
+    const analysis = await aiService.analyzeSentiment(inputValue);
+    userMessage.sentiment = analysis.sentiment;
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
-
-    // Analyze sentiment
-    const sentiment = analyzeSentiment(inputValue);
-    const plantMood = sentimentToMood(sentiment);
-    onSentimentChange(plantMood);
-
-    // Show crisis alert if needed
-    if (sentiment === 'crisis') {
-      toast({
-        title: "Support Resources Available",
-        description: "If you're in crisis, please reach out for help immediately. You matter! 💚",
-        variant: "destructive"
-      });
+    
+    // Check for crisis intervention
+    if (analysis.crisisRisk) {
+      setShowCrisisIntervention(true);
+      setIsTyping(false);
+      return;
     }
+    
+    onSentimentChange(sentimentToMood(analysis.sentiment));
 
-    // Simulate AI response delay
-    setTimeout(() => {
+    try {
+      // Generate AI response
+      const chatHistory: ChatMessage[] = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+        sentiment: msg.sentiment
+      }));
+
+      const botResponseContent = await aiService.generateResponse(chatHistory, inputValue);
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: generateResponse(inputValue, sentiment),
-        sender: 'bot',
+        content: botResponseContent,
+        role: 'assistant',
         timestamp: new Date(),
-        sentiment: sentiment as any
+        sentiment: 'positive'
       };
-
+      
       setMessages(prev => [...prev, botResponse]);
+      
+      // Update plant stats for experience
+      storageService.updatePlantExperience(10);
+      
+      toast({
+        title: "Great conversation! 🌱",
+        description: "+10 EXP for connecting with PlantPal!"
+      });
+      
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "I'm having trouble connecting right now. Let's try again in a moment! 🌿",
+        role: 'assistant',
+        timestamp: new Date(),
+        sentiment: 'neutral'
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 2000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -198,15 +226,15 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
           <div
             key={message.id}
             className={`flex gap-3 ${
-              message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
+              message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
             }`}
           >
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-              message.sender === 'user' 
+              message.role === 'user' 
                 ? 'bg-primary text-primary-foreground' 
                 : 'bg-muted'
             }`}>
-              {message.sender === 'user' ? (
+              {message.role === 'user' ? (
                 <User className="w-4 h-4" />
               ) : (
                 <Bot className="w-4 h-4" />
@@ -214,10 +242,10 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
             </div>
             
             <div className={`max-w-[80%] ${
-              message.sender === 'user' ? 'text-right' : 'text-left'
+              message.role === 'user' ? 'text-right' : 'text-left'
             }`}>
               <div className={`inline-block p-3 rounded-2xl ${
-                message.sender === 'user'
+                message.role === 'user'
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted/70'
               }`}>
@@ -231,7 +259,7 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
                     minute: '2-digit' 
                   })}
                 </span>
-                {message.sentiment && message.sender === 'user' && (
+                {message.sentiment && message.role === 'user' && (
                   <Badge 
                     variant="outline" 
                     className={`text-xs ${getSentimentColor(message.sentiment)}`}
@@ -286,6 +314,12 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
           </Button>
         </div>
       </div>
+
+      {/* Crisis Intervention Modal */}
+      <CrisisIntervention 
+        isActive={showCrisisIntervention}
+        onClose={() => setShowCrisisIntervention(false)}
+      />
     </Card>
   );
 };

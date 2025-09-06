@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import PlantCompanion from '@/components/PlantCompanion';
 import ChatInterface from '@/components/ChatInterface';
+import AchievementSystem from '@/components/AchievementSystem';
+import MoodTracker from '@/components/MoodTracker';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageCircle, Leaf, BarChart3 } from 'lucide-react';
@@ -61,23 +64,14 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="garden">
-            <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-              <Leaf className="w-16 h-16 mx-auto mb-4 text-primary" />
-              <h3 className="text-2xl font-semibold mb-2">Your Garden</h3>
-              <p className="text-muted-foreground">
-                Coming soon: View all your plant companions and achievements!
-              </p>
-            </Card>
+            <div className="grid lg:grid-cols-2 gap-6">
+              <AchievementSystem />
+              <MoodTracker onMoodLogged={handleSentimentChange} />
+            </div>
           </TabsContent>
 
           <TabsContent value="insights">
-            <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-              <BarChart3 className="w-16 h-16 mx-auto mb-4 text-primary" />
-              <h3 className="text-2xl font-semibold mb-2">Mood Analytics</h3>
-              <p className="text-muted-foreground">
-                Coming soon: Track your emotional journey and growth patterns!
-              </p>
-            </Card>
+            <AnalyticsDashboard />
           </TabsContent>
         </Tabs>
       </main>
