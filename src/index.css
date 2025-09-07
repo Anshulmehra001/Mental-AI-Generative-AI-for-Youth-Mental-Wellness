@@ -121,6 +121,11 @@
     50% { box-shadow: var(--shadow-glow); }
   }
 
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
   .plant-grow {
     animation: plantGrow 2s ease-in-out;
   }
@@ -131,5 +136,90 @@
 
   .mood-glow {
     animation: moodGlow 2s ease-in-out infinite;
+  }
+
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  /* Custom gradient backgrounds */
+  .bg-gradient-nature {
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(120 65% 85%) 100%);
+  }
+
+  /* Custom shadows using semantic tokens */
+  .shadow-nature {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-plant {
+    box-shadow: var(--shadow-plant);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Plant mood colors for dynamic classes */
+  .bg-plant-happy {
+    background-color: hsl(var(--plant-happy) / 0.1);
+  }
+  
+  .text-plant-happy {
+    color: hsl(var(--plant-happy));
+  }
+  
+  .border-plant-happy {
+    border-color: hsl(var(--plant-happy) / 0.3);
+  }
+
+  .bg-plant-content {
+    background-color: hsl(var(--plant-content) / 0.1);
+  }
+  
+  .text-plant-content {
+    color: hsl(var(--plant-content));
+  }
+  
+  .border-plant-content {
+    border-color: hsl(var(--plant-content) / 0.3);
+  }
+
+  .bg-plant-neutral {
+    background-color: hsl(var(--plant-neutral) / 0.1);
+  }
+  
+  .text-plant-neutral {
+    color: hsl(var(--plant-neutral));
+  }
+  
+  .border-plant-neutral {
+    border-color: hsl(var(--plant-neutral) / 0.3);
+  }
+
+  .bg-plant-sad {
+    background-color: hsl(var(--plant-sad) / 0.1);
+  }
+  
+  .text-plant-sad {
+    color: hsl(var(--plant-sad));
+  }
+  
+  .border-plant-sad {
+    border-color: hsl(var(--plant-sad) / 0.3);
+  }
+
+  .bg-plant-excited {
+    background-color: hsl(var(--plant-excited) / 0.1);
+  }
+  
+  .text-plant-excited {
+    color: hsl(var(--plant-excited));
+  }
+  
+  .border-plant-excited {
+    border-color: hsl(var(--plant-excited) / 0.3);
   }
 }
