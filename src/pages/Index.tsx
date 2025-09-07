@@ -1,18 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PlantCompanion from '@/components/PlantCompanion';
 import ChatInterface from '@/components/ChatInterface';
 import AchievementSystem from '@/components/AchievementSystem';
 import MoodTracker from '@/components/MoodTracker';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import WellnessTips from '@/components/WellnessTips';
+import DailyCheck from '@/components/DailyCheck';
+import MotivationalQuotes from '@/components/MotivationalQuotes';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageCircle, Leaf, BarChart3 } from 'lucide-react';
+import { storageService } from '@/services/storageService';
 
 type PlantMood = 'happy' | 'content' | 'neutral' | 'sad' | 'excited';
 
 const Index = () => {
   const [plantMood, setPlantMood] = useState<PlantMood>('content');
   const [plantInteraction, setPlantInteraction] = useState<string>('');
+
+  // Initialize sample data on component mount
+  useEffect(() => {
+    storageService.initializeSampleData();
+  }, []);
 
   const handlePlantInteraction = (interaction: string) => {
     setPlantInteraction(interaction);
@@ -82,16 +91,23 @@ const Index = () => {
 
             <TabsContent value="garden" className="mt-0">
               <div className="h-[calc(100vh-140px)] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                <div className="grid lg:grid-cols-2 gap-6 p-2">
-                  <AchievementSystem />
-                  <MoodTracker onMoodLogged={handleSentimentChange} />
+                <div className="grid gap-6 p-2">
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <WellnessTips />
+                    <DailyCheck />
+                  </div>
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <AchievementSystem />
+                    <MoodTracker onMoodLogged={handleSentimentChange} />
+                  </div>
                 </div>
               </div>
             </TabsContent>
 
             <TabsContent value="insights" className="mt-0">
               <div className="h-[calc(100vh-140px)] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-                <div className="p-2">
+                <div className="grid gap-6 p-2">
+                  <MotivationalQuotes />
                   <AnalyticsDashboard />
                 </div>
               </div>

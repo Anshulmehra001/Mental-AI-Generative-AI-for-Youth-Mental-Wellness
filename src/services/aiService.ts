@@ -26,8 +26,69 @@ GUIDELINES:
 - Encourage professional help when needed
 - Keep responses concise but meaningful
 - Use plant metaphors to make concepts relatable
+- Include occasional light humor, motivational quotes, or interesting facts
+- Suggest practical activities and coping mechanisms
 
 CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or crisis, respond with concern and provide emergency resources.`;
+
+  private motivationalQuotes = [
+    "Like a bamboo, you bend but never break. Your resilience is your strength! 🎋",
+    "Every seed needs darkness to grow. Your challenges are preparing you for something beautiful 🌱",
+    "In Indian philosophy, we say 'Sab kuch theek ho jayega' - everything will be alright. Trust the process 🕉️",
+    "A lotus blooms most beautifully from the deepest mud. You too can rise above any challenge 🪷",
+    "Remember, even the mighty banyan tree started as a tiny seed. Your growth takes time 🌳",
+    "Like the monsoon brings life after heat, your difficult times will bring new growth 🌧️"
+  ];
+
+  private jokes = [
+    "Why don't plants ever get stressed? Because they know how to stay rooted! 😄",
+    "What did one plant say to another during exams? 'Don't worry, we'll grow through this together!' 📚",
+    "Why are plants great listeners? They never leaf you hanging! 🍃",
+    "What's a plant's favorite type of music? Roots and blues! 🎵",
+    "How do plants stay positive? They always look for the light! ☀️"
+  ];
+
+  private wellnessTips = [
+    "Try the 5-4-3-2-1 grounding technique: 5 things you see, 4 you touch, 3 you hear, 2 you smell, 1 you taste 🧘",
+    "Practice 'Pranayama' - deep breathing from Indian tradition. Inhale for 4, hold for 4, exhale for 6 counts 🫁",
+    "Take a mindful walk in nature, even if it's just to a nearby park or garden 🚶‍♀️",
+    "Try journaling for 5 minutes - write down 3 things you're grateful for today 📝",
+    "Listen to some calming ragas or nature sounds for 10 minutes ♫",
+    "Practice the ancient art of 'Trataka' - gentle candle gazing meditation 🕯️"
+  ];
+
+  private getRandomMotivation(): string {
+    return this.motivationalQuotes[Math.floor(Math.random() * this.motivationalQuotes.length)];
+  }
+
+  private getRandomJoke(): string {
+    return this.jokes[Math.floor(Math.random() * this.jokes.length)];
+  }
+
+  private getRandomTip(): string {
+    return this.wellnessTips[Math.floor(Math.random() * this.wellnessTips.length)];
+  }
+
+  private enhanceResponse(response: string, sentiment: string): string {
+    const enhancements = [];
+    
+    // Add motivational content for negative sentiment
+    if (sentiment === 'negative' && Math.random() > 0.6) {
+      enhancements.push(`\n\n💫 ${this.getRandomMotivation()}`);
+    }
+    
+    // Add wellness tips occasionally
+    if (Math.random() > 0.7) {
+      enhancements.push(`\n\n🌿 Wellness tip: ${this.getRandomTip()}`);
+    }
+    
+    // Add jokes for positive interactions
+    if (sentiment === 'positive' && Math.random() > 0.8) {
+      enhancements.push(`\n\n😊 Here's something to keep you smiling: ${this.getRandomJoke()}`);
+    }
+    
+    return response + enhancements.join('');
+  }
 
   async generateResponse(messages: ChatMessage[], userMessage: string): Promise<string> {
     if (!config.gemini.apiKey || config.gemini.apiKey === 'your-gemini-api-key-here') {
@@ -76,7 +137,11 @@ CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or crisis, r
       }
 
       const data = await response.json();
-      return data.candidates[0]?.content?.parts[0]?.text || "I'm having trouble connecting right now. Please try again! 🌿";
+      const baseResponse = data.candidates[0]?.content?.parts[0]?.text || "I'm having trouble connecting right now. Please try again! 🌿";
+      
+      // Enhance response with motivational content, tips, or jokes
+      const sentiment = messages.length > 0 ? messages[messages.length - 1].sentiment || 'neutral' : 'neutral';
+      return this.enhanceResponse(baseResponse, sentiment);
     } catch (error) {
       console.error('AI Service Error:', error);
       return "I'm experiencing some technical difficulties. Let's try again in a moment! 🌱";
