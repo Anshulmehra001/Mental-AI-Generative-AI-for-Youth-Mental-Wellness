@@ -87,11 +87,11 @@ const PlantCompanion = ({ mood, onInteraction }: PlantCompanionProps) => {
   }, [isAnimating]);
 
   return (
-    <div className="relative flex flex-col items-center p-6 bg-card/50 backdrop-blur-sm rounded-2xl border shadow-nature">
+    <div className="relative flex flex-col items-center h-full">
       {/* Mood Badge */}
       <Badge 
         variant="secondary" 
-        className={`mb-4 text-xs font-medium bg-${moodColors[mood]}/20 text-${moodColors[mood]} border-${moodColors[mood]}/30`}
+        className={`mb-6 text-xs font-medium bg-${moodColors[mood]}/20 text-${moodColors[mood]} border-${moodColors[mood]}/30 animate-fade-in`}
       >
         {moodMessages[mood]}
       </Badge>
@@ -168,21 +168,27 @@ const PlantCompanion = ({ mood, onInteraction }: PlantCompanionProps) => {
       </div>
 
       {/* Plant Stats */}
-      <div className="mt-4 flex gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Heart className="w-4 h-4 text-red-500" />
-          <span>{interactionCount} interactions</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Sparkles className="w-4 h-4 text-yellow-500" />
-          <span>Growing strong!</span>
+      <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20">
+        <div className="flex justify-center gap-6 text-sm">
+          <div className="flex flex-col items-center gap-1">
+            <Heart className="w-5 h-5 text-red-500" />
+            <span className="font-medium">{interactionCount}</span>
+            <span className="text-xs text-muted-foreground">interactions</span>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <Sparkles className="w-5 h-5 text-yellow-500" />
+            <span className="font-medium">Level {Math.floor(interactionCount / 5) + 1}</span>
+            <span className="text-xs text-muted-foreground">growing</span>
+          </div>
         </div>
       </div>
 
       {/* Encouragement Message */}
-      <p className="text-center text-sm text-muted-foreground mt-2 max-w-sm">
-        Click on me or chat with me to help me grow! I respond to your emotions and love our conversations! 💚
-      </p>
+      <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+        <p className="text-center text-sm text-muted-foreground leading-relaxed">
+          Click on me or chat with me to help me grow! I respond to your emotions and love our conversations! 💚
+        </p>
+      </div>
     </div>
   );
 };

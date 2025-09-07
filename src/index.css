@@ -101,7 +101,8 @@
   body {
     @apply bg-background text-foreground font-medium;
     background: hsl(var(--gradient-nature));
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
   }
 
   /* Custom animations for plant interactions */
@@ -221,5 +222,37 @@
   
   .border-plant-excited {
     border-color: hsl(var(--plant-excited) / 0.3);
+  }
+
+  /* Custom scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-primary\/20 {
+    scrollbar-color: hsl(var(--primary) / 0.2) transparent;
+  }
+  
+  .scrollbar-track-transparent {
+    scrollbar-track-color: transparent;
+  }
+
+  /* Webkit scrollbar for better browser support */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.2);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.3);
   }
 }
