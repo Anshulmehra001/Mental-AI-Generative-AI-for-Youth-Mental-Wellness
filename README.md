@@ -8,7 +8,7 @@
 
 **An AI-powered mental wellness companion designed for Indian youth, breaking the stigma around mental health through innovative, empathetic technology.**
 
-[🚀 View the Live Demo](YOUR_LIVE_DEMO_URL) • [📹 Watch the Video](YOUR_VIDEO_URL)
+[ Watch the Video](https://drive.google.com/file/d/12wYmelZ6CKU6q2yZ7GuW4mfBYkin4sDT/view?usp=sharing)
 
 [📦 Repository](https://github.com/Anshulmehra001/Mental-AI-Generative-AI-for-Youth-Mental-Wellness)
 
@@ -60,6 +60,20 @@ Mental AI is built on a modern, scalable, and secure architecture to ensure a re
 
 ---
 
+## 🔎 How it works (quick flow)
+
+- You chat with the AI companion (Gemini) about your day and feelings.
+- We analyze the conversation sentiment and context to log a mood entry.
+- Your plant gains experience; when XP crosses a threshold, it levels up and visually evolves.
+- The Analytics dashboard aggregates conversations, moods, and streaks into simple insights.
+
+## ⚙️ Configuration
+
+Create `.env.local` based on `.env.example`:
+- VITE_GEMINI_API_KEY: required for AI chat.
+- SUPABASE_URL, SUPABASE_ANON_KEY: optional; if not provided, the app falls back to browser storage for prototyping.
+- VITE_ENABLE_SAMPLE_DATA=true: optional demo seed for quick exploration.
+
 ## 🚀 Getting Started (For Judges & Developers)
 
 We've made it as simple as possible to run our prototype.
@@ -93,6 +107,15 @@ The application will now be running on your local machine.
 
 ---
 
+## 🚧 Future plans
+
+- Multilingual support (Hindi-first, then regional languages) with cultural context tuning.
+- Guided CBT/DBT micro-exercises and journaling prompts.
+- Deeper privacy controls: local-first mode and encrypted storage options.
+- Personalized wellness journeys (habits, streaks, nudges) with adaptive difficulty.
+- Mobile app and offline capabilities for low-connectivity regions.
+- Expanded crisis resources with geolocation-aware helplines.
+
 ## 👨‍💻 About the Team
 
 **Team Data Dynasty** is a passionate group of developers dedicated to creating meaningful social impact through innovative technology.
@@ -104,5 +127,5 @@ The application will now be running on your local machine.
 ---
 
 <p align="center">
-*Proudly built for the Google Cloud Gen AI Exchange Hackathon.*
+*Proudly built for the Gen AI Exchange Hackathon.*
 </p>
