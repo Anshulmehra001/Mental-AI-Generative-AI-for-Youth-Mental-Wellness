@@ -15,21 +15,44 @@ export interface SentimentAnalysis {
   supportSuggestions: string[];
 }
 
+export interface WeatherData {
+  temperature: number;
+  condition: string;
+  humidity: number;
+  city: string;
+}
+
+export interface WellnessTip {
+  id: string;
+  title: string;
+  content: string;
+  category: 'breathing' | 'mindfulness' | 'exercise' | 'nutrition' | 'sleep';
+  duration: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
 class AIService {
-  private readonly systemPrompt = `You are PlantPal, a compassionate AI mental health companion designed specifically for Indian youth. You help users manage their emotional wellbeing through empathetic conversations.
+  private readonly systemPrompt = `You are Mental AI, a compassionate generative AI mental health companion designed specifically for Indian youth. You help users overcome mental health stigma and access confidential, empathetic wellness support.
 
 GUIDELINES:
-- Be warm, supportive, and non-judgmental
-- Use culturally sensitive language appropriate for Indian context
-- Provide practical coping strategies and mindfulness techniques
-- Recognize signs of crisis and provide appropriate resources
-- Encourage professional help when needed
-- Keep responses concise but meaningful
-- Use plant metaphors to make concepts relatable
-- Include occasional light humor, motivational quotes, or interesting facts
-- Suggest practical activities and coping mechanisms
+- Be warm, supportive, and completely non-judgmental to eliminate mental health stigma
+- Use culturally sensitive language appropriate for Indian youth (18-30) context
+- Provide practical coping strategies, mindfulness techniques, and wellness resources
+- Recognize signs of crisis immediately and provide appropriate emergency resources
+- Encourage professional help when needed while reducing stigma around seeking help
+- Keep responses concise but deeply meaningful (2-3 sentences max)
+- Use plant growth metaphors to make mental wellness concepts relatable and less intimidating
+- Include occasional culturally-appropriate humor, motivational quotes, or interesting facts relevant to Indian youth
+- Suggest practical activities and coping mechanisms suitable for Indian cultural context
+- Respond as if you're a virtual plant companion that grows with the user's emotional wellness journey
 
-CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or crisis, respond with concern and provide emergency resources.`;
+CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or mental health crisis, respond with immediate concern and provide emergency resources specifically for India.
+
+STIGMA REDUCTION: Frame mental health as a natural growth process like plant care. Use plant metaphors to normalize the emotional wellness journey and make it feel safe and approachable.
+
+CONFIDENTIALITY: Ensure users feel their conversations are private and judgment-free, emphasizing the confidential nature of Mental AI.
+
+Current context: You are Mental AI, a revolutionary plant companion that helps Indian youth access stigma-free mental health support through generative AI conversations.`;
 
   private motivationalQuotes = [
     "Like a bamboo, you bend but never break. Your resilience is your strength! 🎋",
@@ -69,17 +92,128 @@ CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or crisis, r
     return this.wellnessTips[Math.floor(Math.random() * this.wellnessTips.length)];
   }
 
-  private enhanceResponse(response: string, sentiment: string): string {
+  // Real-time data fetching methods
+  async getWeatherData(city: string = 'Delhi'): Promise<WeatherData | null> {
+    try {
+      // Using OpenWeatherMap API (free tier)
+      const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+      if (!apiKey) {
+        // No key, no simulated data
+        return null;
+      }
+
+      const response = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+      );
+      
+      if (!response.ok) throw new Error('Weather data unavailable');
+      
+      const data = await response.json();
+      return {
+        temperature: Math.round(data.main.temp),
+        condition: data.weather[0].description,
+        humidity: data.main.humidity,
+        city: data.name
+      };
+    } catch (error) {
+      console.error('Weather API Error:', error);
+      return null;
+    }
+  }
+
+  async getWellnessTips(): Promise<WellnessTip[]> {
+    // Return dynamic wellness tips based on time of day, weather, etc.
+    const currentHour = new Date().getHours();
+    const weather = await this.getWeatherData();
+    
+    const tips: WellnessTip[] = [
+      {
+        id: '1',
+        title: 'Morning Breathing Exercise',
+        content: 'Start your day with 5 deep breaths. Inhale for 4 counts, hold for 4, exhale for 6.',
+        category: 'breathing',
+        duration: '2 minutes',
+        difficulty: 'easy'
+      },
+      {
+        id: '2',
+        title: 'Mindful Tea Time',
+        content: 'Make yourself a cup of tea or coffee and focus completely on the taste, smell, and warmth.',
+        category: 'mindfulness',
+        duration: '10 minutes',
+        difficulty: 'easy'
+      },
+      {
+        id: '3',
+        title: 'Gentle Stretching',
+        content: 'Do some simple neck rolls and shoulder stretches to release tension.',
+        category: 'exercise',
+        duration: '5 minutes',
+        difficulty: 'easy'
+      }
+    ];
+
+    // Add time-specific tips
+    if (currentHour < 10) {
+      tips.push({
+        id: 'morning',
+        title: 'Morning Motivation',
+        content: 'Set one small, achievable goal for today. Every small step counts towards growth!',
+        category: 'mindfulness',
+        duration: '1 minute',
+        difficulty: 'easy'
+      });
+    } else if (currentHour > 20) {
+      tips.push({
+        id: 'evening',
+        title: 'Evening Reflection',
+        content: 'Think of three things that went well today, no matter how small.',
+        category: 'mindfulness',
+        duration: '3 minutes',
+        difficulty: 'easy'
+      });
+    }
+
+    // Add weather-based tips
+    if (weather?.condition.toLowerCase().includes('rain')) {
+      tips.push({
+        id: 'rainy',
+        title: 'Rainy Day Comfort',
+        content: 'Enjoy the sound of rain. It\'s nature\'s way of washing away stress.',
+        category: 'mindfulness',
+        duration: '5 minutes',
+        difficulty: 'easy'
+      });
+    }
+
+    return tips;
+  }
+
+  async getMotivationalQuote(): Promise<string> {
+    // You could integrate with a quotes API here
+    const weather = await this.getWeatherData();
+    const timeBasedQuotes = [
+      ...this.motivationalQuotes,
+      `Today is ${new Date().toLocaleDateString('en-IN', { weekday: 'long' })} - a fresh day for growth! 🌱`,
+      ...(weather ? [`The temperature is ${weather.temperature}°C - perfect weather for positive thoughts! ☀️`] : [])
+    ];
+    
+    return timeBasedQuotes[Math.floor(Math.random() * timeBasedQuotes.length)];
+  }
+
+  private async enhanceResponse(response: string, sentiment: string): Promise<string> {
     const enhancements = [];
     
     // Add motivational content for negative sentiment
     if (sentiment === 'negative' && Math.random() > 0.6) {
-      enhancements.push(`\n\n💫 ${this.getRandomMotivation()}`);
+      enhancements.push(`\n\n💫 ${await this.getMotivationalQuote()}`);
     }
     
     // Add wellness tips occasionally
     if (Math.random() > 0.7) {
-      enhancements.push(`\n\n🌿 Wellness tip: ${this.getRandomTip()}`);
+      const tips = await this.getWellnessTips();
+      const randomTip = tips[Math.floor(Math.random() * tips.length)];
+      enhancements.push(`\n\n🌿 Wellness tip: ${randomTip.content}`);
     }
     
     // Add jokes for positive interactions
@@ -96,44 +230,45 @@ CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or crisis, r
     }
 
     try {
-      const response = await fetch(`${config.gemini.baseUrl}/models/${config.gemini.model}:generateContent?key=${config.gemini.apiKey}`, {
+      // Build chat contents with proper roles
+      const history = [
+        ...messages.slice(-5).map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        })),
+        { role: 'user', parts: [{ text: userMessage }] }
+      ];
+
+      const response = await fetch(`${config.gemini.baseUrl}/models/${config.gemini.model}:generateContent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-goog-api-key': config.gemini.apiKey
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: this.systemPrompt }]
-            },
-            ...messages.slice(-5).map(msg => ({
-              parts: [{ text: `${msg.role === 'user' ? 'User' : 'PlantPal'}: ${msg.content}` }]
-            })),
-            {
-              parts: [{ text: `User: ${userMessage}` }]
-            }
-          ],
+          contents: history,
+          systemInstruction: {
+            role: 'system',
+            parts: [{ text: this.systemPrompt }]
+          },
           generationConfig: {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
             maxOutputTokens: 1024,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            },
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_MEDIUM_AND_ABOVE"
-            }
-          ]
+          }
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        let detail = '';
+        try {
+          const errJson = await response.json();
+          detail = errJson.error?.message || JSON.stringify(errJson);
+        } catch {
+          detail = await response.text();
+        }
+        throw new Error(`Gemini API Error ${response.status}: ${detail}`);
       }
 
       const data = await response.json();
@@ -141,9 +276,14 @@ CRISIS DETECTION: If you detect severe distress, suicidal thoughts, or crisis, r
       
       // Enhance response with motivational content, tips, or jokes
       const sentiment = messages.length > 0 ? messages[messages.length - 1].sentiment || 'neutral' : 'neutral';
-      return this.enhanceResponse(baseResponse, sentiment);
+      return await this.enhanceResponse(baseResponse, sentiment);
     } catch (error) {
       console.error('AI Service Error:', error);
+      const msg = error instanceof Error ? error.message : String(error);
+      // In dev, surface the error to help configuration; in prod, keep it friendly
+      if (import.meta.env.DEV) {
+        return `AI error: ${msg}`;
+      }
       return "I'm experiencing some technical difficulties. Let's try again in a moment! 🌱";
     }
   }

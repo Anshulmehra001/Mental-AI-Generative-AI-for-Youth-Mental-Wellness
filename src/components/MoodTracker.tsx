@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { storageService, MoodEntry } from '@/services/storageService';
+import { databaseService } from '@/services/databaseService';
 import { toast } from '@/hooks/use-toast';
 
 type Mood = 'happy' | 'content' | 'neutral' | 'sad' | 'excited';
@@ -41,29 +41,36 @@ const MoodTracker = ({ onMoodLogged }: MoodTrackerProps) => {
     );
   };
 
-  const handleSubmit = () => {
-    const entry: MoodEntry = {
-      id: Date.now().toString(),
-      mood: selectedMood,
-      intensity: intensity[0],
-      timestamp: new Date(),
-      notes: notes.trim() || undefined,
-      triggers: selectedTriggers.length > 0 ? selectedTriggers : undefined
-    };
+  const handleSubmit = async () => {
+    try {
+      const entry = {
+        mood: selectedMood,
+        intensity: intensity[0],
+        notes: notes.trim() || undefined,
+        triggers: selectedTriggers.length > 0 ? selectedTriggers : undefined
+      };
 
-    storageService.saveMoodEntry(entry);
-    onMoodLogged(selectedMood);
-    
-    toast({
-      title: "Mood logged! 📝",
-      description: "Your mood has been recorded. Keep growing! 🌱"
-    });
+      await databaseService.saveMoodEntry(entry);
+      onMoodLogged(selectedMood);
+      
+      toast({
+        title: "Mood logged! 📝",
+        description: "Your mood has been recorded. Keep growing! 🌱"
+      });
 
-    // Reset form
-    setSelectedMood('neutral');
-    setIntensity([5]);
-    setNotes('');
-    setSelectedTriggers([]);
+      // Reset form
+      setSelectedMood('neutral');
+      setIntensity([5]);
+      setNotes('');
+      setSelectedTriggers([]);
+    } catch (error) {
+      console.error('Error saving mood entry:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save mood entry. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

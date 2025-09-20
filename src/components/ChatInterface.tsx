@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Send, Bot, User, Heart, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { aiService, ChatMessage } from '@/services/aiService';
-import { storageService } from '@/services/storageService';
+import { databaseService } from '@/services/databaseService';
 import CrisisIntervention from './CrisisIntervention';
 
 interface Message extends ChatMessage {
@@ -22,7 +22,7 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: "Hello! I'm PlantPal, your AI companion! 🌱 I'm here to listen, support, and grow with you. How are you feeling today?",
+      content: "Hello! I'm Mental AI, your empathetic wellness companion! 🧠 I'm here to provide confidential, stigma-free mental health support specifically designed for Indian youth. How are you feeling today?",
       role: 'assistant',
       timestamp: new Date(),
       sentiment: 'positive'
@@ -128,6 +128,18 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
     userMessage.sentiment = analysis.sentiment;
 
     setMessages(prev => [...prev, userMessage]);
+    
+    // Save user message to database
+    try {
+      await databaseService.saveChatMessage({
+        role: 'user',
+        content: userMessage.content,
+        sentiment: analysis.sentiment
+      });
+    } catch (error) {
+      console.error('Error saving user message:', error);
+    }
+
     setInputValue('');
     setIsTyping(true);
     
@@ -161,8 +173,30 @@ const ChatInterface = ({ onSentimentChange, plantInteraction }: ChatInterfacePro
       
       setMessages(prev => [...prev, botResponse]);
       
+      // Save bot response to database
+      try {
+        await databaseService.saveChatMessage({
+          role: 'assistant',
+          content: botResponseContent,
+          sentiment: 'positive'
+        });
+      } catch (error) {
+        console.error('Error saving bot message:', error);
+      }
+      
       // Update plant stats for experience
-      storageService.updatePlantExperience(10);
+      // Update plant stats via database service
+      try {
+        const stats = await databaseService.getPlantStats();
+        await databaseService.updatePlantStats({
+          experience: stats.experience + 10,
+          total_conversations: stats.total_conversations + 1
+        });
+        // Notify listeners to refresh plant stats
+        window.dispatchEvent(new Event('plant-stats-updated'));
+      } catch (error) {
+        console.error('Error updating plant stats:', error);
+      }
       
       toast({
         title: "Great conversation! 🌱",

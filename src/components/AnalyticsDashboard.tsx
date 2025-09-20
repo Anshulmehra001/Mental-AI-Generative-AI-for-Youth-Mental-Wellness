@@ -10,22 +10,38 @@ import {
   TrendingUp, Calendar, Smile, BarChart3, 
   Target, Activity, Heart, Brain 
 } from 'lucide-react';
-import { storageService, MoodEntry } from '@/services/storageService';
+import { databaseService, DbMoodEntry, DbPlantStats } from '@/services/databaseService';
 
 const AnalyticsDashboard = () => {
-  const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
-  const [plantStats, setPlantStats] = useState(storageService.getPlantStats());
+  const [moodEntries, setMoodEntries] = useState<DbMoodEntry[]>([]);
+  const [plantStats, setPlantStats] = useState<DbPlantStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setMoodEntries(storageService.getMoodEntries());
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    try {
+      const [entriesData, statsData] = await Promise.all([
+        databaseService.getMoodEntries(),
+        databaseService.getPlantStats()
+      ]);
+      setMoodEntries(entriesData);
+      setPlantStats(statsData);
+    } catch (error) {
+      console.error('Error loading analytics data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Chart data processing
   const getWeeklyMoodData = () => {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     
-    const recentEntries = moodEntries.filter(entry => entry.timestamp >= weekAgo);
+    const recentEntries = moodEntries.filter(entry => new Date(entry.created_at) >= weekAgo);
     const groupedByDay: Record<string, { totalMood: number; count: number }> = {};
     
     // Initialize all days of the week
@@ -37,7 +53,7 @@ const AnalyticsDashboard = () => {
     }
     
     recentEntries.forEach(entry => {
-      const day = entry.timestamp.toLocaleDateString('en-US', { weekday: 'short' });
+      const day = new Date(entry.created_at).toLocaleDateString('en-US', { weekday: 'short' });
       if (groupedByDay[day]) {
         groupedByDay[day].totalMood += moodToNumber(entry.mood);
         groupedByDay[day].count += 1;
@@ -107,6 +123,29 @@ const AnalyticsDashboard = () => {
   const moodScore = calculateMoodScore();
   const consistencyScore = getConsistencyScore();
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="p-4 animate-pulse">
+              <div className="h-8 bg-muted rounded mb-2"></div>
+              <div className="h-4 bg-muted rounded"></div>
+            </Card>
+          ))}
+        </div>
+        <div className="grid lg:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="p-6 animate-pulse">
+              <div className="h-6 bg-muted rounded mb-4"></div>
+              <div className="h-64 bg-muted rounded"></div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
@@ -147,9 +186,12 @@ const AnalyticsDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Plant Level</p>
-              <p className="text-2xl font-bold text-primary">{plantStats.level}</p>
+              <p className="text-2xl font-bold text-primary">{plantStats?.level || 1}</p>
             </div>
             <Brain className="w-8 h-8 text-orange-500" />
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            {plantStats?.total_conversations || 0} conversations
           </div>
         </Card>
       </div>
@@ -238,7 +280,7 @@ const AnalyticsDashboard = () => {
                   className="w-2 h-2 rounded-full mr-2" 
                   style={{ backgroundColor: entry.color }}
                 />
-                {entry.name}: {entry.value}
+                {entry.name}: {String(entry.value)}
               </Badge>
             ))}
           </div>
@@ -299,7 +341,7 @@ const AnalyticsDashboard = () => {
             <h4 className="font-medium mb-2">Most Common Mood</h4>
             <p className="text-sm text-muted-foreground">
               {moodDistribution.length > 0 
-                ? `You feel ${moodDistribution.sort((a, b) => b.value - a.value)[0]?.name.toLowerCase()} most often`
+                ? `You feel ${moodDistribution.sort((a, b) => Number(b.value) - Number(a.value))[0]?.name.toLowerCase()} most often`
                 : 'Start tracking to discover patterns'
               }
             </p>
