@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mental AI - Your AI Mental Health Companion</title>
+    <meta name="description" content="An AI-powered mental health companion that grows with your emotions. Track your mood, chat with your plant friend, and build healthy habits." />
+    <meta name="author" content="PlantPal Team" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/plant-favicon.svg" />
+
+    <meta property="og:title" content="🌱 PlantPal - Your AI Mental Health Companion" />
+    <meta property="og:description" content="An AI-powered mental health companion that grows with your emotions. Track your mood, chat with your plant friend, and build healthy habits." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/placeholder.svg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="🌱 PlantPal - Your AI Mental Health Companion" />
+    <meta name="twitter:description" content="An AI-powered mental health companion that grows with your emotions" />
+    <meta name="twitter:image" content="/placeholder.svg" />
+  </head>
+
+  <body>
+    <div id="boot-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0b0c;color:#e5e7eb;font-family:system-ui,Arial,sans-serif;z-index:9999;">
+      <div style="max-width:680px;padding:20px;text-align:center;">
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Starting Mental AI…</div>
+        <div id="boot-msg" style="opacity:0.8;font-size:14px;">Loading assets and scripts</div>
+        <pre id="boot-error" style="display:none;text-align:left;margin-top:12px;padding:12px;border-radius:8px;background:#111418;color:#fca5a5;white-space:pre-wrap;word-break:break-word;max-height:40vh;overflow:auto;"></pre>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script>
+      (function(){
+        let _mounted = false;
+        const overlay = document.getElementById('boot-overlay');
+        const msg = document.getElementById('boot-msg');
+        const err = document.getElementById('boot-error');
+
+        function hideOverlay(){
+          if(!overlay) return;
+          overlay.style.opacity = '0';
+          setTimeout(()=> overlay.style.display = 'none', 150);
+        }
+
+        // Expose boot API without recursive setter
+        window.__boot = {};
+        Object.defineProperty(window.__boot, 'mounted', {
+          configurable: true,
+          enumerable: true,
+          set(v){ _mounted = !!v; hideOverlay(); },
+          get(){ return _mounted; }
+        });
+
+        // Capture errors so we don't get a white screen
+        window.addEventListener('error', (e)=>{
+          if(!err || !overlay) return;
+          msg.textContent = 'A startup error occurred:';
+          err.style.display = 'block';
+          err.textContent = (e.error && e.error.stack) || String(e.message || e);
+        });
+        window.addEventListener('unhandledrejection', (e)=>{
+          if(!err || !overlay) return;
+          msg.textContent = 'An initialization promise failed:';
+          err.style.display = 'block';
+          err.textContent = (e.reason && e.reason.stack) || String(e.reason || e);
+        });
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

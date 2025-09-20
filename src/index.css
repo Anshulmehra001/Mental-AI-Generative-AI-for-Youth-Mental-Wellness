@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PlantPal - Nature-inspired design system for AI mental health companion */
+
+@layer base {
+  :root {
+    /* Nature-inspired color palette */
+    --background: 95 38% 96%;
+    --foreground: 80 39% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 80 39% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 80 39% 15%;
+
+    /* Plant-themed primary colors */
+    --primary: 120 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 120 65% 45%;
+
+    /* Soft earth tones */
+    --secondary: 95 25% 92%;
+    --secondary-foreground: 80 39% 15%;
+
+    --muted: 95 25% 92%;
+    --muted-foreground: 80 20% 45%;
+
+    --accent: 140 55% 85%;
+    --accent-foreground: 80 39% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 95 25% 88%;
+    --input: 95 25% 88%;
+    --ring: 120 100% 25%;
+
+    --radius: 0.75rem;
+
+    /* Nature gradients */
+    --gradient-nature: linear-gradient(135deg, hsl(120 65% 85%), hsl(95 55% 75%));
+    --gradient-plant: linear-gradient(180deg, hsl(120 100% 25%), hsl(120 65% 45%));
+    
+    /* Plant growth states */
+    --plant-happy: 120 100% 25%;
+    --plant-content: 95 65% 45%;
+    --plant-neutral: 60 35% 55%;
+    --plant-sad: 200 35% 65%;
+    --plant-excited: 45 100% 55%;
+    
+    /* Beautiful shadows */
+    --shadow-plant: 0 10px 30px -10px hsl(120 100% 25% / 0.3);
+    --shadow-glow: 0 0 40px hsl(120 65% 45% / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(95 25% 88% / 0.6);
+    
+    /* Smooth transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .dark {
+    --background: 80 15% 8%;
+    --foreground: 95 25% 92%;
+
+    --card: 80 15% 12%;
+    --card-foreground: 95 25% 92%;
+
+    --popover: 80 15% 12%;
+    --popover-foreground: 95 25% 92%;
+
+    --primary: 120 65% 45%;
+    --primary-foreground: 80 15% 8%;
+    --primary-glow: 120 100% 65%;
+
+    --secondary: 80 15% 18%;
+    --secondary-foreground: 95 25% 92%;
+
+    --muted: 80 15% 18%;
+    --muted-foreground: 95 15% 65%;
+
+    --accent: 140 25% 25%;
+    --accent-foreground: 95 25% 92%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 95 25% 92%;
+
+    --border: 80 15% 18%;
+    --input: 80 15% 18%;
+    --ring: 120 65% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-medium;
+    background: var(--gradient-nature);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Custom animations for plant interactions */
+  @keyframes plantGrow {
+    0% { transform: scale(1) translateY(0px); }
+    50% { transform: scale(1.05) translateY(-2px); }
+    100% { transform: scale(1) translateY(0px); }
+  }
+
+  @keyframes leafSway {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  @keyframes moodGlow {
+    0%, 100% { box-shadow: var(--shadow-plant); }
+    50% { box-shadow: var(--shadow-glow); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .plant-grow {
+    animation: plantGrow 2s ease-in-out;
+  }
+
+  .leaf-sway {
+    animation: leafSway 3s ease-in-out infinite;
+  }
+
+  .mood-glow {
+    animation: moodGlow 2s ease-in-out infinite;
+  }
+
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  /* Custom gradient backgrounds */
+  .bg-gradient-nature {
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(120 65% 85%) 100%);
+  }
+
+  /* Custom shadows using semantic tokens */
+  .shadow-nature {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-plant {
+    box-shadow: var(--shadow-plant);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Plant mood colors for dynamic classes */
+  .bg-plant-happy {
+    background-color: hsl(var(--plant-happy) / 0.1);
+  }
+  
+  .text-plant-happy {
+    color: hsl(var(--plant-happy));
+  }
+  
+  .border-plant-happy {
+    border-color: hsl(var(--plant-happy) / 0.3);
+  }
+
+  .bg-plant-content {
+    background-color: hsl(var(--plant-content) / 0.1);
+  }
+  
+  .text-plant-content {
+    color: hsl(var(--plant-content));
+  }
+  
+  .border-plant-content {
+    border-color: hsl(var(--plant-content) / 0.3);
+  }
+
+  .bg-plant-neutral {
+    background-color: hsl(var(--plant-neutral) / 0.1);
+  }
+  
+  .text-plant-neutral {
+    color: hsl(var(--plant-neutral));
+  }
+  
+  .border-plant-neutral {
+    border-color: hsl(var(--plant-neutral) / 0.3);
+  }
+
+  .bg-plant-sad {
+    background-color: hsl(var(--plant-sad) / 0.1);
+  }
+  
+  .text-plant-sad {
+    color: hsl(var(--plant-sad));
+  }
+  
+  .border-plant-sad {
+    border-color: hsl(var(--plant-sad) / 0.3);
+  }
+
+  .bg-plant-excited {
+    background-color: hsl(var(--plant-excited) / 0.1);
+  }
+  
+  .text-plant-excited {
+    color: hsl(var(--plant-excited));
+  }
+  
+  .border-plant-excited {
+    border-color: hsl(var(--plant-excited) / 0.3);
+  }
+
+  /* Custom scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-primary\/20 {
+    scrollbar-color: hsl(var(--primary) / 0.2) transparent;
+  }
+  
+  .scrollbar-track-transparent {
+    scrollbar-track-color: transparent;
+  }
+
+  /* Webkit scrollbar for better browser support */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.2);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.3);
+  }
+}
